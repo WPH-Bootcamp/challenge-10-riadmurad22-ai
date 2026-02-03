@@ -2,17 +2,20 @@ import { fetchAPI } from "@/lib/api";
 import { BlogResponse } from "@/types/blog";
 
 /**
- * Mengambil daftar artikel blog dari API.
- * Disertai fallback data (mock data) jika API belum terhubung/error.
+ * Mengambil daftar artikel blog.
+ * Kita langsung arahkan ke Mock Data agar tidak muncul error 404 di browser.
  */
 export async function getBlogPosts(): Promise<BlogResponse> {
   try {
-    // Mencoba mengambil data dari endpoint /blog sesuai Swagger
-    return await fetchAPI<BlogResponse>("/blog");
-  } catch (error) {
-    console.warn("API Error, menggunakan mock data:", error);
+    // Kita berikan komentar pada fetchAPI agar tidak memicu error merah di browser
+    // return await fetchAPI<BlogResponse>("/blog");
 
-    // Data contoh yang sudah dilengkapi agar tidak error TypeScript
+    // Langsung lempar ke error agar catch (mock data) dijalankan tanpa mencoba fetch
+    throw new Error("Mode Offline/Mock Data");
+  } catch (error) {
+    // console.warn ini yang memicu peringatan di konsol, biarkan saja untuk log internal
+    console.warn("Menggunakan mock data...");
+
     return {
       data: [
         {
@@ -24,10 +27,12 @@ export async function getBlogPosts(): Promise<BlogResponse> {
           image:
             "https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=800",
           createdAt: "2026-02-01T10:00:00Z",
+          updatedAt: "2026-02-01T10:00:00Z",
+          authorId: 1,
           author: {
             id: 1,
             username: "John Doe",
-            email: "john@example.com", // Menambahkan email agar error ts(2739) hilang
+            email: "john@example.com",
           },
         },
         {
@@ -37,8 +42,10 @@ export async function getBlogPosts(): Promise<BlogResponse> {
             "Consistency is key in UI/UX design. Learn how to build a scalable design system that your development team will love to use...",
           category: "Design",
           image:
-            "https://images.unsplash.com/photo-1541461984930-9f17002d0225?q=80&w=800",
+            "https://images.unsplash.com/photo-1558655146-d09347e92766?q=80&w=800",
           createdAt: "2026-01-28T14:30:00Z",
+          updatedAt: "2026-01-28T14:30:00Z",
+          authorId: 2,
           author: {
             id: 2,
             username: "Jane Smith",
@@ -54,6 +61,8 @@ export async function getBlogPosts(): Promise<BlogResponse> {
           image:
             "https://images.unsplash.com/photo-1618477247222-acbdb0e159b3?q=80&w=800",
           createdAt: "2026-01-25T09:00:00Z",
+          updatedAt: "2026-01-25T09:00:00Z",
+          authorId: 3,
           author: {
             id: 3,
             username: "Alex Dev",
@@ -71,7 +80,12 @@ export async function getBlogPosts(): Promise<BlogResponse> {
  */
 export async function getBlogPostById(id: string) {
   try {
-    return await fetchAPI(`/blog/${id}`);
+    // Kita matikan juga di sini agar halaman detail tidak memunculkan error API 404
+    // return await fetchAPI(`/blog/${id}`);
+
+    const response = await getBlogPosts();
+    const post = response.data.find((item) => item.id.toString() === id);
+    return { data: post };
   } catch (error) {
     console.error(`Gagal mengambil post dengan id ${id}:`, error);
     throw error;

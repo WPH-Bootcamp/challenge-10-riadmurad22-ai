@@ -3,7 +3,7 @@
 /* Gunakan komentar ini untuk memberi tahu VS Code agar tidak cerewet */
 /* css-unused-properties: disable */
 
-@theme {
+:root {
   --color-blog-dark: #1e1e1e;
   --font-size-display-3xl: 4.5rem;
   --font-size-display-2xl: 3.75rem;

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 // @ts-ignore
-// @ts-expect-error - Bug visual Next.js 15 pada import CSS
 import "./globals.css";
 
 // 1. Import Navbar yang baru saja kita buat
