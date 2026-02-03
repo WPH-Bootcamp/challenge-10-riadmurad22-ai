@@ -34,10 +34,8 @@ export default function RootLayout({
         {/* 2. Letakkan Navbar di sini agar muncul di semua halaman */}
         <Navbar />
 
-        {/* 3. Main content (halaman-halaman kamu) akan muncul di sini */}
-        <main>{children}</main>
-
-        {/* 4. (Opsional) Kamu bisa tambah Footer di sini nanti */}
+        {/* Tambahkan padding-top (pt-20) agar konten tidak tertutup Navbar */}
+        <main className="pt-20">{children}</main>
       </body>
     </html>
   );
