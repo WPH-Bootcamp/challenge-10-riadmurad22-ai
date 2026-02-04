@@ -1,79 +1,75 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const router = useRouter();
+  const [email, setEmail] = useState("riadmurad22@gmail.com");
+  const [password, setPassword] = useState("******");
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleSignIn = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Login dengan:", { email, password });
-    // Nantinya kita akan hubungkan ke API Auth di sini
-    alert("Fitur Login sedang disiapkan!");
+
+    // 1. Simpan kembali data user ke LocalStorage agar Navbar & Profile mengenalimu
+    const userData = {
+      name: "M Riad Murad", 
+      bio: "Tech Enthusiast & Blogger. Suka sekali tantangan untuk mengeksplorasi teknologi web terbaru dan tercanggih ooiii ...",
+    };
+    
+    localStorage.setItem("user_profile", JSON.stringify(userData));
+
+    // 2. Gunakan window.location.replace agar Navbar mendeteksi perubahan storage secara total
+    window.location.replace("/profile");
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gray-50 px-6">
-      <div className="max-w-md w-full bg-white rounded-[2.5rem] shadow-2xl p-10 md:p-14 border border-gray-100">
-        <div className="text-center mb-10">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2 italic">
-            BLOG<span className="text-blue-600">.</span>
-          </h1>
-          <p className="text-gray-500">
-            Selamat datang kembali! Silakan masuk ke akun Anda.
-          </p>
+    <main className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+      <div className="bg-white w-full max-w-md rounded-[3rem] shadow-2xl shadow-blue-500/10 p-12 text-center">
+        
+        {/* Logo */}
+        <div className="text-3xl font-black italic tracking-tighter text-gray-900 mb-4">
+          BLOG<span className="text-blue-600">.</span>
         </div>
+        
+        <h1 className="text-gray-900 text-xl font-bold mb-2">Selamat datang kembali!</h1>
+        <p className="text-gray-400 text-sm mb-10">Silakan masuk ke akun Anda.</p>
 
-        <form onSubmit={handleLogin} className="space-y-6">
+        <form onSubmit={handleSignIn} className="space-y-4 text-left">
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2 ml-1">
-              Email Address
-            </label>
-            <input
-              type="email"
-              placeholder="name@example.com"
-              className="w-full px-6 py-4 rounded-2xl bg-gray-50 border border-transparent focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"
+            <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Email Address</label>
+            <input 
+              type="email" 
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              required
+              className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all font-medium"
+              placeholder="name@example.com"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2 ml-1">
-              Password
-            </label>
-            <input
-              type="password"
-              placeholder="••••••••"
-              className="w-full px-6 py-4 rounded-2xl bg-gray-50 border border-transparent focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"
+            <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Password</label>
+            <input 
+              type="password" 
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              required
+              className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all font-medium"
+              placeholder="••••••"
             />
           </div>
 
-          <button
+          <button 
             type="submit"
-            className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold text-lg shadow-lg shadow-blue-500/30 transition-all active:scale-[0.98]"
+            className="w-full py-4 bg-blue-600 text-white rounded-2xl font-bold text-lg shadow-lg shadow-blue-500/30 hover:bg-blue-700 hover:-translate-y-1 transition-all mt-6"
           >
             Sign In
           </button>
         </form>
 
-        <div className="mt-8 text-center">
-          <p className="text-gray-500">
-            Belum punya akun?{" "}
-            <Link
-              href="/register"
-              className="text-blue-600 font-bold hover:underline"
-            >
-              Daftar Gratis
-            </Link>
-          </p>
-        </div>
+        <p className="mt-10 text-sm text-gray-400">
+          Belum punya akun? <Link href="/register" className="text-blue-600 font-bold hover:underline">Daftar Gratis</Link>
+        </p>
       </div>
     </main>
   );
