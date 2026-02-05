@@ -1,88 +1,53 @@
 import { BlogPost } from "@/types/blog";
 import Link from "next/link";
 
-interface BlogCardProps {
-  post: BlogPost;
-}
+export default function BlogCard({ post }: { post: BlogPost }) {
+  // Logika cerdas: pakai description jika ada, kalau tidak ada potong dari content
+  const displayDescription = post.description || 
+    (post.content ? post.content.substring(0, 100) + "..." : "No description available");
 
-export default function BlogCard({ post }: BlogCardProps) {
   return (
-    <article className="group flex flex-col h-full bg-white rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-xl border border-gray-100">
-      {/* 1. Bagian Gambar Utama */}
-      <div className="relative aspect-16/10 w-full overflow-hidden bg-gray-100">
-        <img
-          src={
-            post.image ||
-            "https://images.unsplash.com/photo-1499750310107-5fef28a66643?q=80&w=800"
-          }
-          alt={post.title}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-        />
-        {/* Badge Kategori */}
-        <div className="absolute top-4 left-4">
-          <span className="bg-blue-600 text-white text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-widest shadow-lg">
-            {post.category || "Insight"}
-          </span>
-        </div>
-      </div>
-
-      {/* 2. Bagian Konten Teks */}
-      <div className="flex flex-col grow p-6">
-        <div className="flex items-center gap-2 text-xs text-gray-500 mb-3">
-          <span>
-            {post.createdAt
-              ? new Date(post.createdAt).toLocaleDateString("id-ID", {
-                  dateStyle: "medium",
-                })
-              : "Baru Saja"}
-          </span>
-          <span>•</span>
-          <span>5 mnt baca</span>
+    <Link href={`/blog/${post.id}`}>
+      <div className="group bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-[2.5rem] overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 h-full flex flex-col">
+        
+        {/* Gambar Artikel */}
+        <div className="overflow-hidden">
+          <img 
+            src={post.image} 
+            alt={post.title} 
+            className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110" 
+          />
         </div>
 
-        <h3 className="text-xl font-bold text-[#1E1E1E] mb-3 leading-tight group-hover:text-blue-600 transition-colors line-clamp-2">
-          {post.title}
-        </h3>
+        <div className="p-8 flex flex-col flex-1">
+          {/* Kategori */}
+          <span className="text-blue-600 dark:text-blue-400 text-xs font-bold uppercase tracking-widest mb-4">
+            {post.category}
+          </span>
 
-        <p className="text-gray-600 text-sm leading-relaxed mb-6 line-clamp-3">
-          {post.content}
-        </p>
+          {/* Judul */}
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 leading-tight">
+            {post.title}
+          </h3>
 
-        {/* 3. Footer Kartu (Penulis & Tombol Navigasi) */}
-        <div className="mt-auto pt-6 border-t border-gray-50 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            {/* Avatar Inisial */}
-            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs uppercase">
-              {post.author?.username?.charAt(0) || "W"}
+          {/* Deskripsi Singkat */}
+          <p className="text-gray-500 dark:text-gray-400 text-sm line-clamp-3 mb-6 leading-relaxed">
+            {displayDescription}
+          </p>
+
+          {/* Footer Kartu */}
+          <div className="mt-auto flex justify-between items-center pt-6 border-t border-gray-50 dark:border-gray-700">
+            <div className="flex items-center gap-2">
+               <span className="text-xs font-medium text-gray-400 dark:text-gray-500">
+                 By {post.author?.username || "Admin"}
+               </span>
             </div>
-            <span className="text-sm font-semibold text-gray-800">
-              {post.author?.username || "Penulis"}
+            <span className="text-xs font-bold text-blue-600 dark:text-blue-400 italic">
+              Read More →
             </span>
           </div>
-
-          {/* Link ke Halaman Detail */}
-          <Link
-            href={`/blog/${post.id}`}
-            className="text-blue-600 hover:text-blue-700 font-bold text-sm flex items-center gap-1 group/link"
-          >
-            Read More
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4 transition-transform group-hover/link:translate-x-1"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 5l7 7-7 7"
-              />
-            </svg>
-          </Link>
         </div>
       </div>
-    </article>
+    </Link>
   );
 }

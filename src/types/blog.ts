@@ -41,6 +41,7 @@ export interface BlogPost {
   content: string;
   image: string;
   category: string;
+  description?: string; // TAMBAHKAN BARIS INI
   createdAt: string;
   updatedAt: string;
   authorId: number;

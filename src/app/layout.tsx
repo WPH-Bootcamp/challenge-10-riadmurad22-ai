@@ -1,41 +1,27 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
 // @ts-ignore
 import "./globals.css";
-
-// 1. Import Navbar yang baru saja kita buat
 import Navbar from "@/components/layout/Navbar";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Blog App Challenge",
-  description: "Blog Application Challenge - Next.js",
+  title: "Blog. - Personal Story",
+  description: "Temukan wawasan terbaru tentang teknologi dan desain.",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="id">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {/* 2. Letakkan Navbar di sini agar muncul di semua halaman */}
+    <html lang="en">
+      {/* Kita tambahkan class antialiased dan transition untuk kenyamanan mata */}
+      <body className={`${inter.className} bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-500 antialiased`}>
         <Navbar />
-
-        {/* Tambahkan padding-top (pt-20) agar konten tidak tertutup Navbar */}
-        <main className="pt-20">{children}</main>
+        {children}
       </body>
     </html>
   );

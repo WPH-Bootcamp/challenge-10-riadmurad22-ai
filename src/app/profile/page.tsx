@@ -1,164 +1,111 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getBlogPosts } from "@/services/blogService";
+import { useRouter } from "next/navigation";
 import BlogCard from "@/app/blog/BlogCard";
-import { BlogPost } from "@/types/blog";
 import Link from "next/link";
 
 export default function ProfilePage() {
+  const router = useRouter();
   const [myPosts, setMyPosts] = useState<any[]>([]);
+  const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  const [user, setUser] = useState({
-    name: "Riad Murad",
-    email: "riadmurad22@gmail.com",
-    avatar:
-      "https://ui-avatars.com/api/?name=Riad+Murad&background=0066FF&color=fff&size=128",
-    bio: "Tech Enthusiast & Blogger.",
-  });
-
   useEffect(() => {
-    // Muat data Profil
-    const savedProfile = localStorage.getItem("user_profile");
-    if (savedProfile) {
-      const parsed = JSON.parse(savedProfile);
-      setUser((prev) => ({
-        ...prev,
-        name: parsed.name,
-        bio: parsed.bio,
-        avatar: `https://ui-avatars.com/api/?name=${parsed.name.replace(/\s/g, "+")}&background=0066FF&color=fff&size=128`,
-      }));
+    const activeUser = localStorage.getItem("user_profile");
+
+    // JIKA DATA KOSONG, JANGAN LOADING TERUS, TAPI PINDAH KE LOGIN
+    if (!activeUser) {
+      router.push("/login");
+      return;
     }
 
-    // Muat data Artikel
-    const savedStories = localStorage.getItem("my_stories");
-    if (savedStories) {
-      setMyPosts(JSON.parse(savedStories));
-      setLoading(false);
-    } else {
-      const fetchMyPosts = async () => {
-        try {
-          const response = await getBlogPosts();
-          setMyPosts(response.data.slice(0, 2));
-        } finally {
-          setLoading(false);
-        }
-      };
-      fetchMyPosts();
-    }
-  }, []);
+    const parsedUser = JSON.parse(activeUser);
+    setUser(parsedUser);
 
-  // FUNGSI BARU: Menghapus Artikel
+    // Filter cerita spesifik milik user yang login
+    const allStories = JSON.parse(localStorage.getItem("my_stories") || "[]");
+    const userStories = allStories.filter(
+      (post: any) => post.authorEmail === parsedUser.email,
+    );
+
+    setMyPosts(userStories);
+    setLoading(false);
+  }, [router]);
+
   const deletePost = (id: number) => {
-    if (confirm("Yakin ingin menghapus cerita ini?")) {
-      const updatedPosts = myPosts.filter((post) => post.id !== id);
-      setMyPosts(updatedPosts);
-      localStorage.setItem("my_stories", JSON.stringify(updatedPosts));
+    if (confirm("Hapus cerita ini?")) {
+      const allStories = JSON.parse(localStorage.getItem("my_stories") || "[]");
+      const updatedAll = allStories.filter((p: any) => p.id !== id);
+      localStorage.setItem("my_stories", JSON.stringify(updatedAll));
+      setMyPosts(myPosts.filter((p) => p.id !== id));
     }
   };
 
+  // TAMPILAN LOADING YANG AMAN
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <p className="text-xl font-bold animate-pulse">Menyiapkan profil...</p>
+      </div>
+    );
+  }
+
   return (
-    <main className="min-h-screen bg-white pb-20">
-      <section className="bg-gray-50/50 border-b border-gray-100 pt-32 pb-16 px-6">
-        <div className="container mx-auto max-w-5xl flex flex-col md:flex-row items-center gap-10">
-          <div className="relative group">
-            <img
-              src={user.avatar}
-              alt={user.name}
-              className="w-40 h-40 rounded-[2.5rem] shadow-2xl border-4 border-white transition-transform group-hover:scale-105 duration-300"
-            />
+    <main className="min-h-screen bg-white pt-32 pb-20 px-6">
+      <div className="container mx-auto max-w-5xl">
+        {/* Header Profil Dinamis */}
+        <div className="flex flex-col md:flex-row items-center gap-8 mb-16 p-8 bg-gray-50 rounded-[3rem]">
+          <div className="w-32 h-32 bg-blue-100 rounded-4xl flex items-center justify-center text-4xl shadow-inner">
+            {user.name.charAt(0)}
           </div>
-          <div className="text-center md:text-left flex-1">
-            <h1 className="text-5xl font-extrabold text-gray-900 mb-2 tracking-tighter">
+          <div className="flex-1 text-center md:text-left">
+            <h1 className="text-4xl font-black tracking-tighter">
               {user.name}
             </h1>
-            <p className="text-blue-600 font-semibold text-lg mb-4">
-              {user.email}
-            </p>
-            <p className="text-gray-500 leading-relaxed max-w-xl text-lg">
-              {user.bio}
+            <p className="text-gray-500 mt-2">
+              {user.bio || "Blogger Enthusiast"}
             </p>
           </div>
           <Link
             href="/profile/edit"
-            className="px-8 py-4 bg-white border border-gray-200 rounded-2xl font-bold hover:bg-gray-50 transition-all shadow-sm"
+            className="px-6 py-3 border border-gray-200 rounded-2xl font-bold hover:bg-white transition-all"
           >
             Edit Profile
           </Link>
         </div>
-      </section>
 
-      <section className="container mx-auto px-6 mt-20 max-w-6xl">
-        <div className="flex items-center justify-between mb-12">
-          <h2 className="text-3xl font-bold text-gray-900">
-            My Stories{" "}
-            <span className="ml-2 text-blue-600 opacity-30">
-              {myPosts.length}
-            </span>
-          </h2>
-          <Link
-            href="/write"
-            className="text-blue-600 font-bold hover:underline flex items-center gap-2"
-          >
+        <div className="flex justify-between items-center mb-10">
+          <h2 className="text-3xl font-bold">Cerita Saya ({myPosts.length})</h2>
+          <Link href="/write" className="text-blue-600 font-bold italic">
             Write New +
           </Link>
         </div>
 
-        {loading ? (
-          <div className="text-center py-20 text-gray-400">Loading...</div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
-            {myPosts.map((post) => (
-              <div key={post.id} className="relative group">
-                {/* Tombol Hapus (Hanya muncul saat hover di desktop atau terlihat di mobile) */}
-                <button
-                  onClick={() => deletePost(post.id)}
-                  className="absolute top-4 right-4 z-10 bg-red-500 text-white p-2 rounded-xl shadow-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
-                  title="Delete story"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </button>
-                <BlogCard post={post} />
-              </div>
-            ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {myPosts.map((post) => (
+            <div key={post.id} className="relative group">
+              <button
+                onClick={() => deletePost(post.id)}
+                className="absolute top-4 right-4 z-20 bg-red-500 text-white p-2 rounded-lg opacity-0 group-hover:opacity-100 transition-all shadow-lg"
+              >
+                🗑️
+              </button>
+              <BlogCard post={post} />
+            </div>
+          ))}
 
-            <Link
-              href="/write"
-              className="group border-2 border-dashed border-gray-200 rounded-[3rem] flex flex-col items-center justify-center p-12 hover:border-blue-400 hover:bg-blue-50/50 transition-all min-h-100"
-            >
-              <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-blue-600 group-hover:text-white transition-all">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-8 w-8"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor font-bold"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={3}
-                    d="M12 4v16m8-8H4"
-                  />
-                </svg>
-              </div>
-              <span className="font-bold text-gray-900">New Story</span>
-            </Link>
-          </div>
-        )}
-      </section>
+          <Link
+            href="/write"
+            className="border-2 border-dashed border-gray-200 rounded-[2.5rem] flex flex-col items-center justify-center p-10 hover:border-blue-400 transition-all min-h-87.5"
+          >
+            <span className="text-4xl mb-2">➕</span>
+            <span className="font-bold text-gray-400 text-center">
+              Tulis Cerita Pertama Anda
+            </span>
+          </Link>
+        </div>
+      </div>
     </main>
   );
 }

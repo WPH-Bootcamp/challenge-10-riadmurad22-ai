@@ -1,89 +1,83 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { useState, useEffect } from "react";
 
 export default function WritePage() {
-  const router = useRouter();
   const [title, setTitle] = useState("");
-  const [category, setCategory] = useState("Technology");
   const [content, setContent] = useState("");
+  const [currentUser, setCurrentUser] = useState<any>(null);
+
+  useEffect(() => {
+    // Ambil data siapa yang sedang login secara real-time
+    const session = localStorage.getItem("user_profile");
+    if (session) {
+      setCurrentUser(JSON.parse(session));
+    }
+  }, []);
 
   const handlePublish = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // 1. Buat objek artikel baru
+    if (!currentUser) {
+      alert("Sesi habis, silakan login ulang.");
+      return;
+    }
+
     const newPost = {
-      id: Date.now(), // ID unik berdasarkan waktu
+      id: Date.now(),
       title,
-      category,
-      description: content.substring(0, 100) + "...", // Ambil sedikit isi untuk ringkasan
-      date: new Date().toLocaleDateString("id-ID", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      }),
-      image:
-        "https://images.unsplash.com/photo-1499750310107-5fef28a66643?q=80&w=800&auto=format&fit=crop", // Gambar default
+      description: content.substring(0, 100) + "...",
+      content,
+      category: "Technology",
+      date: new Date().toLocaleDateString("id-ID"),
+      image: "https://images.unsplash.com/photo-1499750310107-5fef28a66643",
+
+      // KUNCI: Data penulis diambil dari profil yang sedang login
+      authorEmail: currentUser.email,
+      author: {
+        name: currentUser.name, // Pasti akan jadi 'Andry Riswana' jika Andry yang login
+        avatar:
+          currentUser.avatar ||
+          `https://ui-avatars.com/api/?name=${currentUser.name.replace(/\s/g, "+")}`,
+      },
     };
 
-    // 2. Ambil data artikel yang sudah ada di storage
-    const existingPosts = JSON.parse(
-      localStorage.getItem("my_stories") || "[]",
+    const allStories = JSON.parse(localStorage.getItem("my_stories") || "[]");
+    localStorage.setItem(
+      "my_stories",
+      JSON.stringify([newPost, ...allStories]),
     );
 
-    // 3. Tambahkan artikel baru ke baris paling atas
-    const updatedPosts = [newPost, ...existingPosts];
-
-    // 4. Simpan kembali ke storage
-    localStorage.setItem("my_stories", JSON.stringify(updatedPosts));
-
-    alert("Story Published Successfully!");
-    router.push("/profile");
+    window.location.replace("/profile");
   };
 
   return (
-    <main className="min-h-screen bg-white pt-32 pb-20 px-6">
-      <div className="container mx-auto max-w-3xl">
-        <form onSubmit={handlePublish} className="space-y-6">
-          <input
-            type="text"
-            placeholder="Title"
-            className="w-full text-5xl font-black outline-none placeholder:text-gray-200 tracking-tighter"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-          />
-
-          <select
-            className="px-4 py-2 rounded-full border border-gray-100 bg-gray-50 text-sm font-bold text-blue-600 outline-none"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
+    <main className="min-h-screen bg-white pt-32 px-6">
+      <form
+        onSubmit={handlePublish}
+        className="container mx-auto max-w-2xl space-y-6"
+      >
+        <input
+          className="text-5xl font-black w-full outline-none text-gray-900"
+          placeholder="Judul"
+          onChange={(e) => setTitle(e.target.value)}
+          required
+        />
+        <textarea
+          className="w-full min-h-100 text-xl outline-none resize-none text-gray-700"
+          placeholder="Tulis ceritamu..."
+          onChange={(e) => setContent(e.target.value)}
+          required
+        />
+        <div className="fixed bottom-10 right-10">
+          <button
+            type="submit"
+            className="bg-blue-600 text-white px-10 py-4 rounded-full font-bold shadow-2xl"
           >
-            <option>Technology</option>
-            <option>Lifestyle</option>
-            <option>Design</option>
-          </select>
-
-          <textarea
-            placeholder="Tell your story..."
-            className="w-full min-h-100 text-xl leading-relaxed outline-none placeholder:text-gray-200 resize-none"
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            required
-          />
-
-          <div className="fixed bottom-10 right-10 flex gap-4">
-            <button
-              type="submit"
-              className="px-10 py-4 bg-blue-600 text-white rounded-full font-bold shadow-2xl shadow-blue-500/40 hover:bg-blue-700 transition-all hover:-translate-y-1"
-            >
-              Publish Now
-            </button>
-          </div>
-        </form>
-      </div>
+            Publish Story
+          </button>
+        </div>
+      </form>
     </main>
   );
 }
