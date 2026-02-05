@@ -1,8 +1,5 @@
 @import "tailwindcss";
 
-/* Gunakan komentar ini untuk memberi tahu VS Code agar tidak cerewet */
-/* css-unused-properties: disable */
-
 :root {
   --color-blog-dark: #1e1e1e;
   --font-size-display-3xl: 4.5rem;
@@ -13,4 +10,10 @@
 body {
   background-color: white;
   color: #1e1e1e;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  scroll-behavior: smooth;
 }

@@ -6,22 +6,37 @@ import Link from "next/link";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("riadmurad22@gmail.com");
-  const [password, setPassword] = useState("******");
+  // Kosongkan default value agar user bisa input sendiri
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   const handleSignIn = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // 1. Simpan kembali data user ke LocalStorage agar Navbar & Profile mengenalimu
-    const userData = {
-      name: "M Riad Murad", 
-      bio: "Tech Enthusiast & Blogger. Suka sekali tantangan untuk mengeksplorasi teknologi web terbaru dan tercanggih ooiii ...",
-    };
-    
-    localStorage.setItem("user_profile", JSON.stringify(userData));
+    // 1. Ambil daftar user yang sudah mendaftar dari LocalStorage
+    const userList = JSON.parse(localStorage.getItem("USER_LIST") || "[]");
 
-    // 2. Gunakan window.location.replace agar Navbar mendeteksi perubahan storage secara total
-    window.location.replace("/profile");
+    // 2. Cari apakah ada email dan password yang cocok
+    const foundUser = userList.find(
+      (u: any) => u.email === email && u.password === password
+    );
+
+    if (foundUser) {
+      // 3. Jika ketemu, simpan data user TERSEBUT ke user_profile (Session aktif)
+      // Kita gunakan kunci "user_profile" agar Navbar & Profile tetap jalan
+      localStorage.setItem("user_profile", JSON.stringify({
+        name: foundUser.name,
+        email: foundUser.email,
+        bio: foundUser.bio || "Blogger Enthusiast",
+        avatar: foundUser.avatar || `https://ui-avatars.com/api/?name=${foundUser.name.replace(/\s/g, "+")}&background=0066FF&color=fff`
+      }));
+
+      // 4. Pindah ke profile
+      window.location.replace("/profile");
+    } else {
+      // Jika tidak ketemu atau salah password
+      alert("Email atau Password salah! Pastikan Anda sudah daftar di halaman Register.");
+    }
   };
 
   return (
@@ -43,8 +58,9 @@ export default function LoginPage() {
               type="email" 
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all font-medium"
+              className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all font-medium text-gray-900"
               placeholder="name@example.com"
+              required
             />
           </div>
 
@@ -54,8 +70,9 @@ export default function LoginPage() {
               type="password" 
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all font-medium"
+              className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all font-medium text-gray-900"
               placeholder="••••••"
+              required
             />
           </div>
 
